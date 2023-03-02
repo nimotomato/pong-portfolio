@@ -1,0 +1,24 @@
+/* Initial position of left paddle */
+.paddle-left{
+    position: absolute;   
+    left: 2%;
+
+    /* width: 0.5em;
+    height: 4em;
+    border-style: solid;
+    border-color: purple;
+    background-color: purple; */
+}
+
+/* Initial position of right paddle */
+.paddle-right{
+    position: absolute;   
+    left: 96%;
+    
+
+    /* width: 0.5em;
+    height: 4em;
+    border-style: solid;
+    border-color: purple;
+    background-color: purple; */
+}
