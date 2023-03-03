@@ -1,0 +1,8 @@
+.board{
+    position: relative;
+    width: 97vw;
+    height: 90vh;
+    transform: translateY(5%);
+    border-style: solid;
+    border-color: rgba(128, 0, 128, 0.623);
+}

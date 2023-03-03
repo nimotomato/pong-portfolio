@@ -1,0 +1,16 @@
+.paddle{
+    position: absolute;
+    height: 10vh;
+    width: 1vh;
+    background-color: coral;
+    top: 50vh;
+    transform: translateY(-50%);
+}
+
+.left.paddle{
+    left: 1vw;
+}
+
+.right.paddle{
+    right: 1vw;
+}
