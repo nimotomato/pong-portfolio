@@ -1,14 +1,16 @@
 .score-container{
     position: absolute;
     left: 50vw;
-    top: 4vw;
+    top: 1vw;
     transform: translateX(-50%);
     display: flex;
     color: coral;
     justify-content: center;
+    font-family: 'Roboto Mono', monospace;
     font-size: 7vh;
-    font-weight: 700;
+    font-weight: 200;
     user-select: none;
+    margin-top: 1em;
 }
 
 .score {

@@ -14,29 +14,33 @@ import {
 
 import { toVh } from '../helpers/toVh';
 import { getRect } from '../helpers/getRect';
+import { normalizeVector } from '../helpers/normalizeVector';
 
 
 const Board = ( { hasStarted, handleScores } )  => {  
     // Set state for initial ball position
     const [ballPosition, setBallPosition] = useState({
         x: 50,
-        y: 50
+        y: 45
     })
 
 
-    // Set state for initial ball direction TO DO: Normalise vectors!
-    const ballDirection = useRef({
-        x: Math.floor(Math.random() * 200)/100 - 1,
-        y: Math.floor(Math.random() * 200)/100 - 1
-    })
+    // Set state for initial ball direction. Sets vector with x & y value. 
+    const ballDirection = useRef(
+        normalizeVector(
+            Math.floor(Math.random() * 200)/100 - 1, 
+            Math.floor(Math.random() * 200)/100 - 1)
+        );
 
 
-    // Set state for ball velocity
+    // Set state for ball velocity 
     const [ballVelocity, setBallVelocity] = useState(1);
 
 
     // Constant controlling how much velocity will increase per paddle collision. Multiplicative.
-    const velocityTuner = 1.1;
+    const velocityTuner = 1.08;
+    // Warning: max velocity larger than paddle width will make ball pass through paddle
+    const maxVelocity = 2.1;
 
 
     // Return true if paddle has collided with ball. Does not use state but the actual rect because state is asynchrous.
@@ -49,7 +53,7 @@ const Board = ( { hasStarted, handleScores } )  => {
         } 
         return false;
     }
-    
+
 
     // Update ball movement. LayoutEffect is paired with animationframe as it is called before each render instead of randomly. 
     useLayoutEffect(() => {
@@ -64,10 +68,10 @@ const Board = ( { hasStarted, handleScores } )  => {
                 ballDirection.current = {
                     x: ballDirection.current.x,
                     y: ballDirection.current.y * -1,
-                  };          
+                };          
             }
 
-
+            
             // Handle horizontal bounds/score
             if (getRect('.ball').left <= getRect('.board').left) {
                 // Function from props in app
@@ -78,22 +82,27 @@ const Board = ( { hasStarted, handleScores } )  => {
             }
 
 
-            // Handle left paddle collision
+            // Handle right paddle collision for speeds below ca velocity = 2. After that the ball move too fast for it to register the collision
             if (hasCollided(getRect('.left.paddle'), getRect('.ball'))) {
                 ballDirection.current = {
                     x: ballDirection.current.x * -1,
                     y: ballDirection.current.y,
                 };    
-                setBallVelocity(ballVelocity * velocityTuner);       
-            // Handle right paddle collision
+                if (ballVelocity < maxVelocity){
+                    setBallVelocity(ballVelocity * velocityTuner);
+                }
+            // Handle right paddle collision for speeds below ca velocity = 2. After that the ball move too fast for it to register the collision
             } else if (hasCollided(getRect('.right.paddle'), getRect('.ball'))) {
                 ballDirection.current = {
                     x: ballDirection.current.x * -1,
                     y: ballDirection.current.y,
                 };    
-                setBallVelocity(ballVelocity * velocityTuner);
-            }
-       
+                if (ballVelocity < maxVelocity){
+                    setBallVelocity(ballVelocity * velocityTuner);
+                }
+            };
+        
+        
 
             // Updates ball position.
             setBallPosition(({
@@ -102,17 +111,17 @@ const Board = ( { hasStarted, handleScores } )  => {
             }));
 
         
-        // Called subsequent renders.
-        requestId = requestAnimationFrame(moveBall);
+            // Called subsequent renders.
+            requestId = requestAnimationFrame(moveBall);
         }
 
     
-    // Called first render
-    requestId = requestAnimationFrame(moveBall);
+        // Called first render
+        requestId = requestAnimationFrame(moveBall);
 
 
-    // Clean up animation frame to prevent massive and rapid performance decline
-    return () => cancelAnimationFrame(requestId)
+        // Clean up animation frame to prevent massive and rapid performance decline
+        return () => cancelAnimationFrame(requestId)
     
 
     // Triggers on ballPosition change only when game has started. Then feeds itself.
@@ -160,19 +169,17 @@ const Board = ( { hasStarted, handleScores } )  => {
     // Adds paddle listeners on each render and cleans up after use.
     useEffect(() => {
         addPaddleListeners()
-
-
         return () => removePaddleListeners()
     }, []);
     
 
-    // Computer player that never fails lol
+    // Computer player that never fails lol. TO DO: Make it fail
     const [rightPaddle, setRightPaddle] = useState()
 
 
     useEffect(() => {
         setRightPaddle(ballPosition.y);
-    }, [ballPosition.y])
+    }, [ballPosition.x])
 
 
     return (

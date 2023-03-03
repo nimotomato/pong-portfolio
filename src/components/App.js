@@ -12,7 +12,7 @@ function App() {
   // Keep track of if game is started and how many rounds.
   const [start, setStart] = useState(false);
 
-  
+
   // Rounds used to reset board.
   const [round, setRound] = useState(0);
 
@@ -22,13 +22,8 @@ function App() {
     const info = document.querySelector('.info-text')
     if (!info){
       const startInfo = document.createElement('div');
-      startInfo.classList = "info-text"
+      startInfo.classList = "info-text";
       startInfo.textContent = "PRESS ANY KEY TO START THE GAME";
-      startInfo.style.color = "white";
-      startInfo.style.opacity = "50%";
-      startInfo.style.fontSize = "4em";
-      startInfo.style.userSelect = "none";
-      startInfo.style.position = "absolute";
       document.body.appendChild(startInfo);
     }
   } else {
