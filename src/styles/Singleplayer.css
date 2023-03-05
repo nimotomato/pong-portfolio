@@ -1,0 +1,16 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    background-color: #131313;
+  }
+  
+.info-text{
+  font-family: 'Press Start 2P', cursive;
+  color: white;
+  opacity: 70%;
+  font-size: 2em;
+  user-select: none;
+  position: absolute;
+} 

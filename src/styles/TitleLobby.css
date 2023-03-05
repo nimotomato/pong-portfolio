@@ -1,0 +1,39 @@
+.title-screen{
+    font-family: 'Press Start 2P', cursive;
+    justify-self: center;
+    color: white;
+    font-size: 1em;
+    user-select: none;
+  } 
+  
+  .title-button{
+    color: white;
+    background-color: grey;
+    border-color: #131313;
+    text-align: center;
+    flex: 1;
+    padding: 1em;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.5em;
+    padding-top: 1.5em;
+    padding-bottom: 1.5em;
+    margin-bottom: 2em;
+  }
+  
+  .info-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: grey;
+    border-style: solid;
+  }
+  
+  .game-mode-form {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 1.5em;
+  }
+  
+  .game-mode-title{
+    grid-column: span 2;
+  }

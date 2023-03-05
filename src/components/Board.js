@@ -165,7 +165,6 @@ const Board = ( { hasStarted, handleScores } )  => {
     }
 
 
-
     // Adds paddle listeners on each render and cleans up after use.
     useEffect(() => {
         addPaddleListeners()
