@@ -7,6 +7,8 @@ import Score from './Score';
 
 import { useEffect, useState } from 'react';
 
+// TO DO: Make this some kind of higher order thang that wraps both single and multiplayer
+
 
 function Singleplayer() {
     // Keep track of if game is started and how many rounds.
@@ -32,6 +34,7 @@ function Singleplayer() {
         document.body.removeChild(info)
       }
     }
+
     
     // Adds eventlistener to regulate start of game
     useEffect(() => {

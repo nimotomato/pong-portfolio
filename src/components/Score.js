@@ -1,5 +1,6 @@
 import "../styles/Score.css";
 
+
 const Score = ( {playerOne, playerTwo}) => {
     // Simple scorekeeper
     return ( 
