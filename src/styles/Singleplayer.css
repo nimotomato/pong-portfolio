@@ -1,10 +1,10 @@
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0;
-    background-color: #131313;
-  }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  background-color: #131313;
+}
   
 .info-text{
   font-family: 'Press Start 2P', cursive;

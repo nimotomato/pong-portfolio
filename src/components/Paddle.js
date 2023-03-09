@@ -1,8 +1,11 @@
 import '../styles/Paddle.css';
 
+
 import { 
     useRef, 
     useEffect } from 'react';
+
+
 import { getRect } from '../helpers/getRect';
 import { toVh } from '../helpers/toVh';
 
