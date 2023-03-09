@@ -16,7 +16,6 @@ import {
 import { toVh } from '../helpers/toVh';
 import { getRect } from '../helpers/getRect';
 import { normalizeVector } from '../helpers/normalizeVector';
-import { useFetcher } from 'react-router-dom';
 
 
 const Board = ( { hasStarted, handleScores } )  => {  
@@ -126,7 +125,8 @@ const Board = ( { hasStarted, handleScores } )  => {
     
 
     // Triggers on ballPosition change only when game has started. Then feeds itself.
-    }, [hasStarted && ballPosition]);
+    // Uses all three dependencies to maximize render rate to improve collision detection.
+    }, [hasStarted && ballPosition, hasStarted && ballPosition.x, hasStarted && ballPosition.y]);
  
 
 
@@ -175,7 +175,7 @@ const Board = ( { hasStarted, handleScores } )  => {
 
     // Computer logic
     const [rightPaddle, setRightPaddle] = useState(45)
-    const rightPaddleSpeed = 1 ;
+    const rightPaddleSpeed = 1.2;
 
 
     const moveRightPaddle = (ballPosition, rightPaddle, requestId) => {
