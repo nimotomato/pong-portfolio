@@ -14,7 +14,7 @@
   align-items: center;
   background-color: grey;
   border-style: solid;
-  width: 25em;
+  width: 20em;
   height: 11em;
 }
 
@@ -28,7 +28,7 @@
   font-size: 1em;
   user-select: none;
 } 
-  
+
 .title-button{
   color: white;
   background-color: grey;
@@ -53,4 +53,30 @@
 .game-mode-title{
     text-align: center;
     grid-column: span 2;
+}
+
+.single-player.title-button{
+  grid-column: span 2;
+}
+
+@media only screen and (min-width: 410px) {
+  .info-container {
+    width: 22em;
+  }
+}
+
+@media only screen and (min-width: 550px) {
+/* lgtm */
+}
+
+@media only screen and (min-width: 800px) {
+/* lgtm */
+}
+
+@media only screen and (min-width: 1025px) {
+
+}
+
+@media only screen and (min-width: 1280px) {
+/* lgtm */
 }

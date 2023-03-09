@@ -16,7 +16,7 @@ const Home = () => {
     return ( 
         <div className='title-screen-container'>
             <div className='title-screen'>
-                <h1> Welcome to pong!</h1>
+                <h1 className='title'> Welcome to pong!</h1>
                 <div className='info-container'>
                     <form className='game-mode-form'>
                         <h3 className='game-mode-title'> Choose game mode</h3>

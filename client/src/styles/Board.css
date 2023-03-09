@@ -1,9 +1,32 @@
 .board{
     position: relative;
-    width: 97vw;
-    height: 90vh;
-    transform: translateY(5%);
+    width: 90vw;
+    height: 92vh;
+    margin: 1em;
     border-style: solid;
     border-width: 0.4em;
     border-color: rgba(128, 0, 128, 0.623);
+    touch-action: none;
+}
+
+@media only screen and (min-width: 410px) {
+    /* lgtm */
+  }
+  
+@media only screen and (min-width: 550px) {
+/* lgtm */
+}
+
+@media only screen and (min-width: 800px) {
+/* lgtm */
+}
+
+@media only screen and (min-width: 1025px) {
+    .board{
+        transform: translateY(1%);
+    }
+}
+
+@media only screen and (min-width: 1280px) {
+/* lgtm */
 }

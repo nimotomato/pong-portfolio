@@ -146,6 +146,12 @@ const Board = ( { hasStarted, handleScores } )  => {
         }
     }
 
+    const handleTouchMove = (event) => {
+        if (mouseDown.current) {
+            setLeftPaddle(toVh(event.targetTouches[0].clientY));
+        }
+    }
+
 
     const handleMouseUp = (event) => {
         mouseDown.current = false;
@@ -153,16 +159,30 @@ const Board = ( { hasStarted, handleScores } )  => {
 
 
     const addPaddleListeners = () => {
+        // Mouse
         document.addEventListener('mousedown', handleMouseDown)
-        document.addEventListener('mousemove', handleMouseMove)
+        document.addEventListener('mousemove', handleTouchMove)
         document.addEventListener('mouseup', handleMouseUp)
+
+
+        // Touch screen
+        document.addEventListener('touchstart', handleMouseDown)
+        document.addEventListener('touchmove', handleTouchMove)
+        document.addEventListener('touchend', handleMouseUp)
     }
 
 
     const removePaddleListeners = () => {
+        // Mouse
         document.removeEventListener('mousedown', handleMouseDown)
         document.removeEventListener('mousemove', handleMouseMove)
         document.removeEventListener('mouseup', handleMouseUp)
+
+        
+        // Touch screen
+        document.removeEventListener('touchstart', handleMouseDown)
+        document.removeEventListener('touchmove', handleMouseMove)
+        document.removeEventListener('touchend', handleMouseUp)
     }
 
 
@@ -175,7 +195,7 @@ const Board = ( { hasStarted, handleScores } )  => {
 
     // Computer logic
     const [rightPaddle, setRightPaddle] = useState(45)
-    const rightPaddleSpeed = 1.2;
+    const rightPaddleSpeed = 1.1;
 
 
     const moveRightPaddle = (ballPosition, rightPaddle, requestId) => {

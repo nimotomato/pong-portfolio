@@ -23,7 +23,11 @@ function Singleplayer() {
       if (!info){
         const startInfo = document.createElement('div');
         startInfo.classList = "info-text";
-        startInfo.textContent = "PRESS ANY KEY TO START THE GAME";
+        if (window.innerWidth > 1025){
+          startInfo.textContent = "PRESS ANY KEY TO START THE GAME";
+        } else {
+          startInfo.textContent = "TOUCH TO START";
+        }
         document.body.appendChild(startInfo);
       }
     } else {
@@ -37,13 +41,20 @@ function Singleplayer() {
     // Adds eventlistener to regulate start of game
     useEffect(() => {
       document.addEventListener('keypress', () => {
+        setStart(true)});
+      document.addEventListener('touchstart', () => {
         setStart(true)
-      })
-  
+      });
+      
   
       // Cleanup eventlistener to not keep them stacked.
-      return () => document.removeEventListener('keypress', () => {
+      return () => {
+      document.removeEventListener('keypress', () => {
         setStart(true)});
+      document.removeEventListener('touchstart', () => {
+        setStart(true)
+      });
+    }
     })
     
   

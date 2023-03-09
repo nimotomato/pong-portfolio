@@ -1,7 +1,7 @@
 .score-container{
     position: absolute;
     left: 50vw;
-    top: 1vw;
+    top: 6vw;
     transform: translateX(-50%);
     display: flex;
     color: coral;
@@ -10,7 +10,6 @@
     font-size: 7vh;
     font-weight: 200;
     user-select: none;
-    margin-top: 1em;
 }
 
 .score {
@@ -24,4 +23,24 @@
 .score-container>:first-child{
     text-align: right;
     border-right: .5vh solid coral;
+}
+
+@media only screen and (min-width: 410px) {
+    /* lgtm */
+}
+  
+@media only screen and (min-width: 550px) {
+/* lgtm */
+}
+
+@media only screen and (min-width: 800px) {
+/* lgtm */
+}
+
+@media only screen and (min-width: 1025px) {
+
+}
+
+@media only screen and (min-width: 1280px) {
+/* lgtm */
 }
