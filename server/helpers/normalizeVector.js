@@ -1,4 +1,4 @@
-export const normalizeVector = (x, y) => {
+const normalizeVector = (x, y) => {
     // Normalize vectors by getting magnitude and then dividing vectors by magnitude.
     // Magnitude = sqrt(x^2, y^2)
     const magnitude = Math.sqrt((x**2) + (y**2)); 
@@ -13,4 +13,6 @@ export const normalizeVector = (x, y) => {
         x: normalX,
         y: normalY
     }
-}
+};
+
+module.exports = {normalizeVector};

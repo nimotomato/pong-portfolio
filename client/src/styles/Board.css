@@ -22,9 +22,7 @@
 }
 
 @media only screen and (min-width: 1025px) {
-    .board{
-        transform: translateY(1%);
-    }
+
 }
 
 @media only screen and (min-width: 1280px) {

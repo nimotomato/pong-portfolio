@@ -4,7 +4,6 @@
     width: 2.2vh;
     background-color: coral;
     top: 45vh;
-    transform: translateY(-20%);
 }
 
 .left.paddle{
