@@ -1,6 +1,6 @@
-import Singleplayer from "../components/Singleplayer/SingleplayerDriver";
+import Multiplayer from "../components/MultiplayerDriver";
 
-const SingleplayerPage = () => {
+const MultiplayerPage = () => {
 
     // Delets start game prompt if gets stuck
     const info = document.querySelector('.info-text') 
@@ -8,7 +8,7 @@ const SingleplayerPage = () => {
         document.body.removeChild(info)
     }
 
-    return <Singleplayer />;
+    return <Multiplayer />;
 }
  
-export default SingleplayerPage;
+export default MultiplayerPage;
