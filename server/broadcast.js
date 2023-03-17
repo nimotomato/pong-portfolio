@@ -56,6 +56,7 @@ io.on("connection", (socket) => {
   io.to(Array.from(socket.adapter.sids.keys())[0]).emit("set-players", "left");
   io.to(Array.from(socket.adapter.sids.keys())[1]).emit("set-players", "right");
 
+  console.log(socket.id);
   // Set board rect
   socket.on("board-rect", (data) => {
     boardRect = data;
@@ -86,6 +87,8 @@ io.on("connection", (socket) => {
 
   // Moves paddles on input
   socket.on("move-bar", (data) => {
+    console.log(data);
+
     if (boardRect) {
       // contain left paddle within bounds
       if (data.left <= boardRect.top) {
@@ -105,7 +108,6 @@ io.on("connection", (socket) => {
       rightPaddleRect.bottom = data.right + paddleHeight;
       leftPaddleRect.top = data.left;
       leftPaddleRect.bottom = data.left + paddleHeight;
-
       {
         io.emit("relay-move-bar", data);
       }

@@ -1,7 +1,7 @@
-import "../css/Board.css";
-import Ball from "../Ball";
+import "./styles/Board.css";
+import Ball from "./Ball";
 
-const Board = ({ socket, ballPosition }) => {
+const Board = ({ ballPosition }) => {
   return (
     <div className="board">
       <Ball top={ballPosition.top} left={ballPosition.left} />

@@ -1,18 +1,15 @@
-import "../css/App.css";
+import "./styles/App.css";
 import Paddle from "./MultiplayerPaddle";
 import Board from "./MultiplayerBoard";
 import Score from "./Score";
 
-import { getRect } from "../helpers/getRect";
-import { toVh } from "../helpers/toVh";
-import { toVw } from "../helpers/toVw";
+import { getRect } from "../../helpers/getRect";
+import { toVh } from "../../helpers/toVh";
+import { toVw } from "../../helpers/toVw";
 
-import { io } from "socket.io-client";
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 
-const socket = io("http://localhost:3001");
-
-function App() {
+function App({ socket }) {
   // Give socket connection a player side. Data from server says either right or left.
   const [player, setPlayer] = useState(null);
 

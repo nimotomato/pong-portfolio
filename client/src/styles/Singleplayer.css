@@ -1,4 +1,4 @@
-.info-text{
+/* .info-text{
   font-family: 'Press Start 2P', cursive;
   color: white;
   opacity: 70%;
@@ -8,31 +8,4 @@
   position: absolute;
   width: 90vw;
 } 
-
-@media only screen and (min-width: 410px) {
-  .info-text{
-    width: 85vw;
-  } 
-}
-
-@media only screen and (min-width: 550px) {
-  .info-text{
-    width: 80vw;
-    font-size: 2em;
-
-  } 
-}
-
-@media only screen and (min-width: 800px) {
-  .info-text{
-    font-size: 2em;
-  } 
-}
-
-@media only screen and (min-width: 1025px) {
-/* lgtm */
-}
-
-@media only screen and (min-width: 1280px) {
-/* lgtm */
-}
+ */

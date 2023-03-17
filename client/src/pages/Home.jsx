@@ -21,6 +21,7 @@ const Home = () => {
                     <form className='game-mode-form'>
                         <h3 className='game-mode-title'> Choose game mode</h3>
                         <button className='single-player title-button' onClick={() => {nav('/single-player-game')}}>singleplayer</button>
+                        <button className='multi-player title-button' onClick={() => {nav('/multi-player-menu')}}>multiplayer</button>
                     </form>
                 </div>
             </div>  

@@ -1,7 +1,7 @@
 import "../../styles/Board.css";
 
 import Paddle from "./SinglePlayerPaddle";
-import Ball from "../Ball";
+import Ball from "./Ball";
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
