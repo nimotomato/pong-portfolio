@@ -48,12 +48,6 @@ function App({ socket }) {
     };
 
     socket.emit("game-data", gameData);
-    // TO DO:Bundle this emission
-    // socket.emit("paddle-height", toVh(leftPaddle.height));
-    // socket.emit("ball-axis", ballAxis);
-    // socket.emit("board-rect", boardRect);
-    // socket.emit("left-paddle-rect", leftPaddleRect);
-    // socket.emit("right-paddle-rect", rightPaddleRect);
   }, []);
 
   const [ballPosition, setBallPosition] = useState({});
