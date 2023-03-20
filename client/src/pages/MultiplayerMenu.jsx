@@ -1,21 +1,19 @@
 import { useNavigate } from "react-router-dom";
-import { useRef } from "react";
+import { useState, useRef } from "react";
 import JoinLobby from "../components/Multiplayer/JoinLobby";
 import MultiplayerDriver from "../components/Multiplayer/MultiplayerDriver";
 
 import { io } from "socket.io-client";
 
 const MultiplayerMenu = () => {
-  const socket = io("http://localhost:3001");
+  const socket = useRef(io("http://localhost:3001"));
 
-  const joined = useRef(false);
-
-  // TO DO: FIX SETUP THIS REFRESHES CONNECTION MANY TIMS TURN OFF STRICT MODE?=
+  const [joined, setJoined] = useState(false);
 
   return joined ? (
-    <MultiplayerDriver socket={socket} />
+    <MultiplayerDriver socket={socket.current} />
   ) : (
-    <JoinLobby socket={socket} joined={joined} />
+    <JoinLobby socket={socket.current} joined={setJoined} />
   );
 };
 

@@ -9,8 +9,9 @@ const JoinLobby = ({ socket, joined }) => {
 
   const handleConnect = (event) => {
     event.preventDefault();
-    joined.current = true;
-    console.log(joined);
+    joined(true);
+    const room = idInput;
+    socket.emit("join-room", room);
   };
 
   return (

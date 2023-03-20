@@ -17,52 +17,51 @@ function App({ socket }) {
   useEffect(() => {
     socket.on("set-players", (player) => {
       setPlayer(player);
+      console.log("player side:", player);
     });
 
     const board = getRect(".board");
-
-    const boardRect = {
-      top: toVh(board.top),
-      bottom: toVh(board.bottom),
-      left: toVw(board.left),
-      right: toVw(board.right),
-    };
-
     const leftPaddle = getRect(".left.paddle");
-
-    const leftPaddleRect = {
-      left: toVw(leftPaddle.left),
-      right: toVw(leftPaddle.right),
-    };
-
     const rightPaddle = getRect(".right.paddle");
-
-    const rightPaddleRect = {
-      left: toVw(rightPaddle.left),
-      right: toVw(rightPaddle.right),
-    };
-
     const ball = getRect(".ball");
 
-    const ballAxis = {
-      height: toVh(ball.height),
-      width: toVw(ball.width),
+    const gameData = {
+      boardRect: {
+        top: toVh(board.top),
+        bottom: toVh(board.bottom),
+        left: toVw(board.left),
+        right: toVw(board.right),
+      },
+      paddleHeight: toVh(leftPaddle.height),
+      leftPaddleRect: {
+        left: toVw(leftPaddle.left),
+        right: toVw(leftPaddle.right),
+      },
+      rightPaddleRect: {
+        left: toVw(rightPaddle.left),
+        right: toVw(rightPaddle.right),
+      },
+      ballAxis: {
+        height: toVh(ball.height),
+        width: toVw(ball.width),
+      },
     };
 
+    socket.emit("game-data", gameData);
     // TO DO:Bundle this emission
-    socket.emit("paddle-height", toVh(leftPaddle.height));
-    socket.emit("ball-axis", ballAxis);
-    socket.emit("board-rect", boardRect);
-    socket.emit("left-paddle-rect", leftPaddleRect);
-    socket.emit("right-paddle-rect", rightPaddleRect);
+    // socket.emit("paddle-height", toVh(leftPaddle.height));
+    // socket.emit("ball-axis", ballAxis);
+    // socket.emit("board-rect", boardRect);
+    // socket.emit("left-paddle-rect", leftPaddleRect);
+    // socket.emit("right-paddle-rect", rightPaddleRect);
   }, []);
 
   const [ballPosition, setBallPosition] = useState({});
 
   // Represents the local paddles
   const [positions, setPositions] = useState({
-    left: 50,
-    right: 50,
+    left: 35,
+    right: 35,
   });
 
   socket.on("relay-move-bar", (data) => {
