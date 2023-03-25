@@ -2,19 +2,29 @@ import "./styles/App.css";
 import Paddle from "./MultiplayerPaddle";
 import Board from "./MultiplayerBoard";
 import Score from "./Score";
+import { SocketContext } from "../../context/socket";
 
 import { getRect } from "../../helpers/getRect";
 import { toVh } from "../../helpers/toVh";
 import { toVw } from "../../helpers/toVw";
 
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useContext,
+  useLayoutEffect,
+} from "react";
 
-function App({ socket }) {
+function Driver({ room }) {
+  const socket = useContext(SocketContext);
+
   // Give socket connection a player side. Data from server says either right or left.
+
   const [player, setPlayer] = useState(null);
 
   // Set up connection
-  useEffect(() => {
+  useLayoutEffect(() => {
     socket.on("set-players", (player) => {
       setPlayer(player);
       console.log("player side:", player);
@@ -48,15 +58,13 @@ function App({ socket }) {
     };
 
     socket.emit("game-data", gameData);
+    console.log(gameData);
   }, []);
 
   const [ballPosition, setBallPosition] = useState({});
 
   // Represents the local paddles
-  const [positions, setPositions] = useState({
-    left: 35,
-    right: 35,
-  });
+  const [positions, setPositions] = useState({});
 
   socket.on("relay-move-bar", (data) => {
     // Handle key output. Both paddles must move.
@@ -142,6 +150,8 @@ function App({ socket }) {
   ///////////////////////////////////////////////////////////////////
   const handleKeyPress = (event) => {
     if (event.code === "Space") {
+      socket.emit("start-game", room);
+    } else if (event.code === "r") {
       socket.emit("restart", true);
     }
   };
@@ -158,11 +168,11 @@ function App({ socket }) {
         leftScore={scores.leftScore || 0}
         rightScore={scores.rightScore || 0}
       />
-      <Board socket={socket} ballPosition={ballPosition} />
+      <Board ballPosition={ballPosition} />
       <Paddle direction={"left"} position={positions.left} />
       <Paddle direction={"right"} position={positions.right} />
     </div>
   );
 }
 
-export default App;
+export default Driver;

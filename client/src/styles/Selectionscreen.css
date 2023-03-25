@@ -15,7 +15,7 @@
   background-color: grey;
   border-style: solid;
   width: 20em;
-  height: 11em;
+  height: fit-content;
 }
 
 .title-screen{
@@ -47,12 +47,20 @@
 .game-mode-form{
   display: grid;
   grid-template-columns: auto auto;
-  gap: 1.5em;
+  gap: 1em;
 }
   
 .game-mode-title{
     text-align: center;
+    margin-bottom: 0;
     grid-column: span 2;
+}
+
+.room-list{
+  grid-column: span 2;
+  list-style: none;
+  padding-left: 0;
+  font-size: 0.8em;
 }
 
 .lobby-input{

@@ -1,19 +1,39 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useRef } from "react";
-import JoinLobby from "../components/Multiplayer/JoinLobby";
-import MultiplayerDriver from "../components/Multiplayer/MultiplayerDriver";
-
-import { io } from "socket.io-client";
 
 const MultiplayerMenu = () => {
-  const socket = useRef(io("http://localhost:3001"));
+  const nav = useNavigate();
 
-  const [joined, setJoined] = useState(false);
-
-  return joined ? (
-    <MultiplayerDriver socket={socket.current} />
-  ) : (
-    <JoinLobby socket={socket.current} joined={setJoined} />
+  return (
+    <div className="title-screen">
+      <h1>multiplayer</h1>
+      <div className="info-container">
+        <button
+          className="title-button create-lobby"
+          onClick={() => {
+            nav("/create-lobby");
+          }}
+        >
+          create lobby
+        </button>
+        <button
+          className="title-button join-lobby"
+          onClick={() => {
+            nav("/join-lobby");
+          }}
+        >
+          join lobby
+        </button>
+        <button
+          className="title-button return"
+          onClick={() => {
+            nav("/");
+          }}
+        >
+          return
+        </button>
+      </div>
+    </div>
   );
 };
 

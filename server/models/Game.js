@@ -3,7 +3,10 @@ const { normalizeVector } = require("../helpers/normalizeVector.js");
 const START_VELOCITY = 0.2;
 
 class Game {
-  constructor() {
+  constructor(roomId) {
+    // Room identifier
+    this.roomId = roomId;
+
     // Board data
     this.boardRect;
 
@@ -45,7 +48,7 @@ class Game {
 
     this.ballAxis;
 
-    this.gameStart = true;
+    this.gameStart = false;
   }
 
   moveBall() {
