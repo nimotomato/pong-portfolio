@@ -23,14 +23,12 @@ const REFRESH_RATE = 25;
 const Game = require("./models/Game.js");
 
 // Keep track of games and what rooms they belong to
-const games = {};
+let games = {};
 
 // let game = new Game();
 
 // Broadcast
 io.on("connection", (socket) => {
-  console.log(`User connected: ${socket.id}`);
-
   let roomId;
 
   socket.on("create-lobby", (data) => {
@@ -44,8 +42,6 @@ io.on("connection", (socket) => {
       const status = data;
 
       socket.emit("create-status", status);
-
-      console.log("created lobby:", data);
     } else {
       const status = false;
 
@@ -54,6 +50,21 @@ io.on("connection", (socket) => {
   });
 
   socket.on("request-rooms", () => {
+    const activeRooms = Object.keys(games).filter((roomId) => {
+      return io.sockets.adapter.rooms.has(roomId);
+    });
+    console.log(io.sockets.adapter.rooms);
+    console.log(activeRooms);
+
+    // Update the games object to only include active rooms
+    const updatedGames = {};
+    activeRooms.forEach((roomId) => {
+      updatedGames[roomId] = games[roomId];
+    });
+
+    games = updatedGames;
+    console.log(updatedGames);
+
     socket.emit("rooms", Object.keys(games));
   });
 
@@ -66,8 +77,6 @@ io.on("connection", (socket) => {
       const status = data;
 
       socket.emit("join-status", status);
-
-      console.log("joined lobby:", data);
 
       // Set players
       io.to(Array.from(io.sockets.adapter.rooms.get(data))[0]).emit(
@@ -83,8 +92,6 @@ io.on("connection", (socket) => {
       const status = "not-found";
 
       socket.emit("join-status", status);
-
-      console.log("lobby not found", data);
     } else if (io.sockets.adapter.rooms.get(data).size > 1) {
       const status = "full";
 
@@ -92,8 +99,11 @@ io.on("connection", (socket) => {
 
       console.log("lobby is full", data);
     }
+  });
 
-    console.log("lobby size", io.sockets.adapter.rooms.get(data));
+  socket.on("leave-lobby", (data) => {
+    socket.leave(roomId);
+    console.log(`Socket ${socket.id} left lobby ${roomId}`);
   });
 
   // Get information about local sprite positioning
@@ -111,6 +121,7 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Start game on spacebar.
   socket.on("start-game", (room) => {
     const game = games[room];
 
@@ -120,11 +131,10 @@ io.on("connection", (socket) => {
       io.in(roomId).emit("relay-move-bar", game.paddleYPositions);
     });
 
-    // Allows client to restart on spacebar.
+    // Allows client to restart on 'r'.
     socket.on("restart", (value) => {
-      if (value) {
-        game.reset();
-      }
+      clearInterval(game.gameLoop);
+      game.reset();
     });
 
     // Start the game loop only if it's not already running
@@ -147,7 +157,8 @@ io.on("connection", (socket) => {
       if (game.horizontalCollision()) {
         // Send scores
         io.in(game.roomId).emit("scores", game.scores);
-        game.gameStart = false;
+        clearInterval(game.gameLoop);
+        game.reset();
       }
       //Handle paddle bounds
       if (game.handlePaddleCollision()) {

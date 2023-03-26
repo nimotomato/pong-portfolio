@@ -49,6 +49,8 @@ class Game {
     this.ballAxis;
 
     this.gameStart = false;
+
+    this.gameLoop = null;
   }
 
   moveBall() {
@@ -156,7 +158,9 @@ class Game {
       left: 50,
     };
 
-    this.gameStart = true;
+    this.gameStart = false;
+
+    this.gameLoop = null;
   }
 }
 

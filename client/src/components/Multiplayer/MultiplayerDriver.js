@@ -151,15 +151,26 @@ function Driver({ room }) {
   const handleKeyPress = (event) => {
     if (event.code === "Space") {
       socket.emit("start-game", room);
-    } else if (event.code === "r") {
+    } else if (event.code === "KeyR") {
       socket.emit("restart", true);
+    } else if (event.code === "KeyC") {
+      socket.emit("check");
     }
   };
 
   useEffect(() => {
     document.addEventListener("keypress", handleKeyPress);
+    const eventName = "onpagehide" in window ? "pagehide" : "unload";
+    window.addEventListener(eventName, () => {
+      socket.emit("leave-room");
+    });
 
-    return () => document.removeEventListener("keypress", handleKeyPress);
+    return () => {
+      document.removeEventListener("keypress", handleKeyPress);
+      window.removeEventListener(eventName, () => {
+        socket.emit("leave-room");
+      });
+    };
   }, []);
 
   return (
