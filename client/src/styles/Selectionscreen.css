@@ -35,13 +35,12 @@
   border-color: #131313;
   text-align: center;
   flex: 1;
-  padding: 1em;
+  padding: 1.2em;
+  height: 6em;
   font-family: 'Press Start 2P', cursive;
   font-size: 0.5em;
-  padding-top: 1.5em;
-  padding-bottom: 1.5em;
   margin: 1em;
-  margin-bottom: 2em;
+
 }
   
 .game-mode-form{
@@ -66,6 +65,15 @@
 .lobby-input{
   width: 10em;
 }
+
+.error-string{
+  font-size: 0.6em;
+  color: coral;
+  grid-column: span 2;
+  margin: 0;
+}
+
+
 
 @media only screen and (min-width: 410px) {
   .info-container {

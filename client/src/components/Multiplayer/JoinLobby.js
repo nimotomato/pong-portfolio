@@ -1,29 +1,32 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import { SocketContext } from "../../context/socket";
 
-const JoinLobby = ({ joined }) => {
+const JoinLobby = () => {
   const socket = useContext(SocketContext);
 
   const nav = useNavigate();
-  const [idInput, setIdInput] = useState();
-  const [pwdInput, setPwdInput] = useState();
+  const pwdRef = useRef();
+  const idRef = useRef();
+
   const [rooms, setRooms] = useState();
+  const [error, setError] = useState();
 
   const handleConnect = (event) => {
     event.preventDefault();
-    const room = idInput;
-    socket.emit("join-lobby", room);
+    if (idRef.current) {
+      socket.emit("join-lobby", idRef.current.value);
+    }
   };
 
   useEffect(() => {
     const handleJoinStatus = (data) => {
-      if (data) {
-        joined(data);
-      } else if (data === "not-found") {
-        alert("lobby does not exists, try another one");
+      if (data === "not-found") {
+        setError("lobby does not exists, try another one");
       } else if (data === "full") {
-        alert("lobby full, try another one");
+        setError("lobby is full, try another one");
+      } else if (data) {
+        nav("/multi-player-game");
       }
     };
 
@@ -33,15 +36,20 @@ const JoinLobby = ({ joined }) => {
     return () => {
       socket.off("join-status", handleJoinStatus);
     };
-  }, [joined, socket]);
+  }, [socket]);
 
   useEffect(() => {
+    const handleRooms = (data) => {
+      setRooms(data);
+    };
     // Subscribe to the "rooms" event when the component mounts
     socket.emit("request-rooms");
 
-    socket.on("rooms", (data) => {
-      setRooms(data);
-    });
+    socket.on("rooms", handleRooms);
+
+    return () => {
+      socket.off("rooms", handleRooms);
+    };
   }, [socket]);
 
   const renderRooms = (rooms) => {
@@ -56,39 +64,44 @@ const JoinLobby = ({ joined }) => {
     ));
   };
 
+  const renderErrors = (errorString) => {
+    if (errorString) {
+      return <p className="error-string">{errorString}</p>;
+    }
+  };
+
   return (
-    <div className="title-screen">
-      <h1>multiplayer</h1>
-      <div className="info-container">
-        <form className="game-mode-form">
-          <h3 className="game-mode-title">join lobby</h3>
-          <ul className="room-list">Active lobbies {renderRooms(rooms)}</ul>
-          <input
-            className="lobby-input"
-            type="text"
-            placeholder="lobby id"
-            onChange={(event) => setIdInput(event.target.value)}
-          ></input>
-          <input
-            type="password"
-            placeholder="password"
-            onChange={(event) => setPwdInput(event.target.value)}
-          ></input>
-          <button
-            className="title-button lobby-connect"
-            onClick={handleConnect}
-          >
-            connect
-          </button>
-          <button
-            className="title-button lobby-return"
-            onClick={() => {
-              nav("/multi-player-menu");
-            }}
-          >
-            return
-          </button>
-        </form>
+    <div className="title-screen-container">
+      <div className="title-screen">
+        <h1>multiplayer</h1>
+        <div className="info-container">
+          <form className="game-mode-form">
+            <h3 className="game-mode-title">join lobby</h3>
+            <ul className="room-list">Active lobbies {renderRooms(rooms)}</ul>
+            {error && renderErrors(error)}
+            <input
+              className="lobby-input"
+              type="text"
+              placeholder="lobby id"
+              ref={idRef}
+            ></input>
+            <input type="password" placeholder="password" ref={pwdRef}></input>
+            <button
+              className="title-button lobby-connect"
+              onClick={handleConnect}
+            >
+              connect
+            </button>
+            <button
+              className="title-button lobby-return"
+              onClick={() => {
+                nav("/multi-player-menu");
+              }}
+            >
+              return
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

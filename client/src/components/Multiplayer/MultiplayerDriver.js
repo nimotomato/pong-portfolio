@@ -16,18 +16,16 @@ import {
   useLayoutEffect,
 } from "react";
 
-function Driver({ room }) {
+function Driver() {
   const socket = useContext(SocketContext);
 
   // Give socket connection a player side. Data from server says either right or left.
-
   const [player, setPlayer] = useState(null);
 
   // Set up connection
   useLayoutEffect(() => {
     socket.on("set-players", (player) => {
       setPlayer(player);
-      console.log("player side:", player);
     });
 
     const board = getRect(".board");
@@ -58,7 +56,6 @@ function Driver({ room }) {
     };
 
     socket.emit("game-data", gameData);
-    console.log(gameData);
   }, []);
 
   const [ballPosition, setBallPosition] = useState({});
@@ -103,6 +100,24 @@ function Driver({ room }) {
     }
   };
 
+  const handleTouchMove = (event) => {
+    if (mouseDown.current && player) {
+      let pos;
+      if (player === "right") {
+        pos = {
+          left: positions.left,
+          right: toVh(event.targetTouches[0].clientY),
+        };
+      } else if (player === "left") {
+        pos = {
+          left: toVh(event.targetTouches[0].clientY),
+          right: positions.right,
+        };
+      }
+      socket.emit("move-bar", pos);
+    }
+  };
+
   const handleMouseUp = (event) => {
     mouseDown.current = false;
   };
@@ -111,12 +126,22 @@ function Driver({ room }) {
     document.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
+
+    // Touch screen
+    document.addEventListener("touchstart", handleMouseDown);
+    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("touchend", handleMouseUp);
   };
 
   const removePaddleListeners = () => {
     document.removeEventListener("mousedown", handleMouseDown);
     document.removeEventListener("mousemove", handleMouseMove);
     document.removeEventListener("mouseup", handleMouseUp);
+
+    // Touch screen
+    document.removeEventListener("touchstart", handleMouseDown);
+    document.removeEventListener("touchmove", handleMouseMove);
+    document.removeEventListener("touchend", handleMouseUp);
   };
 
   // Adds paddle listeners on each render and cleans up after use.
@@ -148,28 +173,22 @@ function Driver({ room }) {
   }, [ballPosition]);
 
   ///////////////////////////////////////////////////////////////////
-  const handleKeyPress = (event) => {
-    if (event.code === "Space") {
-      socket.emit("start-game", room);
-    } else if (event.code === "KeyR") {
-      socket.emit("restart", true);
-    } else if (event.code === "KeyC") {
-      socket.emit("check");
-    }
-  };
 
   useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.code === "Space") {
+        socket.emit("start-game");
+      } else if (event.code === "KeyR") {
+        socket.emit("restart", true);
+      } else if (event.code === "KeyC") {
+        socket.emit("check");
+      }
+    };
+
     document.addEventListener("keypress", handleKeyPress);
-    const eventName = "onpagehide" in window ? "pagehide" : "unload";
-    window.addEventListener(eventName, () => {
-      socket.emit("leave-room");
-    });
 
     return () => {
       document.removeEventListener("keypress", handleKeyPress);
-      window.removeEventListener(eventName, () => {
-        socket.emit("leave-room");
-      });
     };
   }, []);
 

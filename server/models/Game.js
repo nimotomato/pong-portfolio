@@ -1,9 +1,7 @@
 const { normalizeVector } = require("../helpers/normalizeVector.js");
 
-const START_VELOCITY = 0.2;
-
 class Game {
-  constructor(roomId) {
+  constructor(roomId, START_VELOCITY) {
     // Room identifier
     this.roomId = roomId;
 

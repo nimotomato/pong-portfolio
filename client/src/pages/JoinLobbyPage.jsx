@@ -1,19 +1,14 @@
-import { useState, useRef } from "react";
+import { useState, useEffect } from "react";
 import JoinLobby from "../components/Multiplayer/JoinLobby";
 import MultiplayerDriver from "../components/Multiplayer/MultiplayerDriver";
+import { useNavigate } from "react-router-dom";
 
 import { SocketContext, socket } from "../context/socket";
 
 const JoinLobbyPage = () => {
-  const [joined, setJoined] = useState(false);
-
-  return joined ? (
+  return (
     <SocketContext.Provider value={socket}>
-      <MultiplayerDriver room={joined} />
-    </SocketContext.Provider>
-  ) : (
-    <SocketContext.Provider value={socket}>
-      <JoinLobby joined={setJoined} />
+      <JoinLobby />
     </SocketContext.Provider>
   );
 };

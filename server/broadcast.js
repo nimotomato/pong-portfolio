@@ -19,13 +19,13 @@ server.listen(port, () => {
 
 // Refresh rate in ms.
 const REFRESH_RATE = 25;
+const START_VELOCITY = 0.4;
+const VELOCITY_INCREASE = 1.3;
 
 const Game = require("./models/Game.js");
 
 // Keep track of games and what rooms they belong to
 let games = {};
-
-// let game = new Game();
 
 // Broadcast
 io.on("connection", (socket) => {
@@ -37,7 +37,8 @@ io.on("connection", (socket) => {
 
       roomId = data;
 
-      games[data] = new Game(data);
+      games[data] = new Game(data, START_VELOCITY);
+      console.log(games[data]);
 
       const status = data;
 
@@ -53,8 +54,6 @@ io.on("connection", (socket) => {
     const activeRooms = Object.keys(games).filter((roomId) => {
       return io.sockets.adapter.rooms.has(roomId);
     });
-    console.log(io.sockets.adapter.rooms);
-    console.log(activeRooms);
 
     // Update the games object to only include active rooms
     const updatedGames = {};
@@ -71,7 +70,6 @@ io.on("connection", (socket) => {
   socket.on("join-lobby", (data) => {
     if (games[data] && io.sockets.adapter.rooms.get(data).size === 1) {
       socket.join(data);
-
       roomId = data;
 
       const status = data;
@@ -101,11 +99,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("leave-lobby", (data) => {
-    socket.leave(roomId);
-    console.log(`Socket ${socket.id} left lobby ${roomId}`);
-  });
-
   // Get information about local sprite positioning
   socket.on("game-data", (data) => {
     const game = games[roomId];
@@ -122,28 +115,33 @@ io.on("connection", (socket) => {
   });
 
   // Start game on spacebar.
-  socket.on("start-game", (room) => {
-    const game = games[room];
+  socket.on("start-game", () => {
+    if (io.sockets.adapter.rooms.get(roomId).size == 2) {
+      const game = games[roomId];
+      console.log(game.ballDirection);
 
-    // Moves paddles on input, timeout to prevent sending data too frequently causing lag
-    socket.on("move-bar", (data) => {
-      game.movePaddles(data);
-      io.in(roomId).emit("relay-move-bar", game.paddleYPositions);
-    });
+      // Moves paddles on input, timeout to prevent sending data too frequently causing lag
+      socket.on("move-bar", (data) => {
+        game.movePaddles(data);
+        io.in(roomId).emit("relay-move-bar", game.paddleYPositions);
+      });
 
-    // Allows client to restart on 'r'.
-    socket.on("restart", (value) => {
-      clearInterval(game.gameLoop);
-      game.reset();
-    });
+      // Allows client to restart on 'r'.
+      socket.on("restart", (value) => {
+        clearInterval(game.gameLoop);
+        game.reset();
+      });
 
-    // Start the game loop only if it's not already running
-    if (!game.gameLoop) {
-      game.gameStart = true;
+      // Start the game loop only if it's not already running
+      if (!game.gameLoop) {
+        game.gameStart = true;
 
-      game.gameLoop = setInterval(() => {
-        updateGame(game);
-      }, REFRESH_RATE);
+        game.gameLoop = setInterval(() => {
+          updateGame(game);
+        }, REFRESH_RATE);
+      }
+    } else if (io.sockets.adapter.rooms.get(roomId).size == 1) {
+      io.in(roomId).emit("waiting-for-player");
     }
   });
 
@@ -163,6 +161,7 @@ io.on("connection", (socket) => {
       //Handle paddle bounds
       if (game.handlePaddleCollision()) {
         game.ballDirection.x = game.ballDirection.x * -1;
+        game.ballVelocity = game.ballVelocity * VELOCITY_INCREASE;
       }
       game.moveBall();
       // Sending data to client
