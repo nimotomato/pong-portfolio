@@ -1,0 +1,16 @@
+.paddle{
+    width: 1.8em;
+    height: 11em;
+    top: 50vh;
+    position: absolute;
+}
+
+.right{
+    background-color: coral;
+    left: 94vw;
+}
+
+.left{
+    background-color: coral;
+    left: 5vw;
+}

@@ -1,7 +1,4 @@
-import { useEffect, useRef } from "react";
-import "../css/Paddle.css";
-import { getRect } from "../helpers/getRect";
-import { toVh } from "../helpers/toVh";
+import "./styles/Paddle.css";
 
 const Paddle = ({ direction, position }) => {
   return (

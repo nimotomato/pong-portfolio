@@ -1,4 +1,4 @@
-.board{
+/* .board{
     position: relative;
     width: 90vw;
     height: 92vh;
@@ -8,23 +8,4 @@
     border-color: rgba(128, 0, 128, 0.623);
     touch-action: none;
 }
-
-@media only screen and (min-width: 410px) {
-    /* lgtm */
-  }
-  
-@media only screen and (min-width: 550px) {
-/* lgtm */
-}
-
-@media only screen and (min-width: 800px) {
-/* lgtm */
-}
-
-@media only screen and (min-width: 1025px) {
-
-}
-
-@media only screen and (min-width: 1280px) {
-/* lgtm */
-}
+ */

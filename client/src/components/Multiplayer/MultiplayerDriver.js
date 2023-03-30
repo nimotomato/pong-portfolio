@@ -1,72 +1,69 @@
-import "../css/App.css";
+import "./styles/App.css";
 import Paddle from "./MultiplayerPaddle";
 import Board from "./MultiplayerBoard";
 import Score from "./Score";
+import { SocketContext } from "../../context/socket";
 
-import { getRect } from "../helpers/getRect";
-import { toVh } from "../helpers/toVh";
-import { toVw } from "../helpers/toVw";
+import { getRect } from "../../helpers/getRect";
+import { toVh } from "../../helpers/toVh";
+import { toVw } from "../../helpers/toVw";
 
-import { io } from "socket.io-client";
-import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useContext,
+  useLayoutEffect,
+} from "react";
 
-const socket = io("http://localhost:3001");
+function Driver() {
+  const socket = useContext(SocketContext);
 
-function App() {
   // Give socket connection a player side. Data from server says either right or left.
   const [player, setPlayer] = useState(null);
+  const [timeoutId, setTimeoutId] = useState(null);
+  const [ready, setReady] = useState(false);
 
   // Set up connection
-  useEffect(() => {
+  useLayoutEffect(() => {
     socket.on("set-players", (player) => {
       setPlayer(player);
     });
 
     const board = getRect(".board");
-
-    const boardRect = {
-      top: toVh(board.top),
-      bottom: toVh(board.bottom),
-      left: toVw(board.left),
-      right: toVw(board.right),
-    };
-
     const leftPaddle = getRect(".left.paddle");
-
-    const leftPaddleRect = {
-      left: toVw(leftPaddle.left),
-      right: toVw(leftPaddle.right),
-    };
-
     const rightPaddle = getRect(".right.paddle");
-
-    const rightPaddleRect = {
-      left: toVw(rightPaddle.left),
-      right: toVw(rightPaddle.right),
-    };
-
     const ball = getRect(".ball");
 
-    const ballAxis = {
-      height: toVh(ball.height),
-      width: toVw(ball.width),
+    const gameData = {
+      boardRect: {
+        top: toVh(board.top),
+        bottom: toVh(board.bottom),
+        left: toVw(board.left),
+        right: toVw(board.right),
+      },
+      paddleHeight: toVh(leftPaddle.height),
+      leftPaddleRect: {
+        left: toVw(leftPaddle.left),
+        right: toVw(leftPaddle.right),
+      },
+      rightPaddleRect: {
+        left: toVw(rightPaddle.left),
+        right: toVw(rightPaddle.right),
+      },
+      ballAxis: {
+        height: toVh(ball.height),
+        width: toVw(ball.width),
+      },
     };
 
-    // TO DO:Bundle this emission
-    socket.emit("paddle-height", toVh(leftPaddle.height));
-    socket.emit("ball-axis", ballAxis);
-    socket.emit("board-rect", boardRect);
-    socket.emit("left-paddle-rect", leftPaddleRect);
-    socket.emit("right-paddle-rect", rightPaddleRect);
+    socket.emit("game-data", gameData);
   }, []);
 
   const [ballPosition, setBallPosition] = useState({});
 
   // Represents the local paddles
-  const [positions, setPositions] = useState({
-    left: 50,
-    right: 50,
-  });
+  const [positions, setPositions] = useState({});
 
   socket.on("relay-move-bar", (data) => {
     // Handle key output. Both paddles must move.
@@ -77,6 +74,7 @@ function App() {
   const [scores, setScores] = useState({});
 
   socket.on("scores", (data) => {
+    setReady(false);
     setScores(data);
   });
 
@@ -105,20 +103,53 @@ function App() {
     }
   };
 
+  const handleTouchMove = (event) => {
+    if (mouseDown.current && player) {
+      let pos;
+      if (player === "right") {
+        pos = {
+          left: positions.left,
+          right: toVh(event.targetTouches[0].clientY),
+        };
+      } else if (player === "left") {
+        pos = {
+          left: toVh(event.targetTouches[0].clientY),
+          right: positions.right,
+        };
+      }
+      socket.emit("move-bar", pos);
+    }
+  };
+
   const handleMouseUp = (event) => {
     mouseDown.current = false;
   };
 
   const addPaddleListeners = () => {
-    document.addEventListener("mousedown", handleMouseDown);
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    const id = setTimeout(() => {
+      document.addEventListener("mousedown", handleMouseDown);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+
+      // Touch screen
+      document.addEventListener("touchstart", handleMouseDown);
+      document.addEventListener("touchmove", handleTouchMove);
+      document.addEventListener("touchend", handleMouseUp);
+    }, 500);
+    setTimeoutId(id);
   };
 
   const removePaddleListeners = () => {
+    clearTimeout(timeoutId);
+
     document.removeEventListener("mousedown", handleMouseDown);
     document.removeEventListener("mousemove", handleMouseMove);
     document.removeEventListener("mouseup", handleMouseUp);
+
+    // Touch screen
+    document.removeEventListener("touchstart", handleMouseDown);
+    document.removeEventListener("touchmove", handleTouchMove);
+    document.removeEventListener("touchend", handleMouseUp);
   };
 
   // Adds paddle listeners on each render and cleans up after use.
@@ -150,16 +181,23 @@ function App() {
   }, [ballPosition]);
 
   ///////////////////////////////////////////////////////////////////
-  const handleKeyPress = (event) => {
-    if (event.code === "Space") {
-      socket.emit("restart", true);
-    }
-  };
 
   useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (!ready && event.code === "Space") {
+        setReady(true);
+        socket.emit("start-game");
+      } else if (event.code === "KeyR") {
+        setReady(false);
+        socket.emit("restart", true);
+      }
+    };
+
     document.addEventListener("keypress", handleKeyPress);
 
-    return () => document.removeEventListener("keypress", handleKeyPress);
+    return () => {
+      document.removeEventListener("keypress", handleKeyPress);
+    };
   }, []);
 
   return (
@@ -168,11 +206,11 @@ function App() {
         leftScore={scores.leftScore || 0}
         rightScore={scores.rightScore || 0}
       />
-      <Board socket={socket} ballPosition={ballPosition} />
+      <Board ballPosition={ballPosition} ready={ready} />
       <Paddle direction={"left"} position={positions.left} />
       <Paddle direction={"right"} position={positions.right} />
     </div>
   );
 }
 
-export default App;
+export default Driver;

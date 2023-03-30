@@ -1,4 +1,4 @@
-/* .score-container{
+.score-container{
     position: absolute;
     left: 50vw;
     top: 6vw;
@@ -24,4 +24,23 @@
     text-align: right;
     border-right: .5vh solid coral;
 }
- */
+
+@media only screen and (min-width: 410px) {
+    /* lgtm */
+}
+  
+@media only screen and (min-width: 550px) {
+/* lgtm */
+}
+
+@media only screen and (min-width: 800px) {
+/* lgtm */
+}
+
+@media only screen and (min-width: 1025px) {
+
+}
+
+@media only screen and (min-width: 1280px) {
+/* lgtm */
+}

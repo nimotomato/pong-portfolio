@@ -1,0 +1,11 @@
+.ball{
+    position: absolute;
+    width: 0.9em;
+    height: 0.9em;
+    background-color: antiquewhite;
+    border-radius: 50%;
+    top: 50vh;
+    left: 50vw;
+}
+
+

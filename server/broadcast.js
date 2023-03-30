@@ -1,182 +1,170 @@
-const { normalizeVector } = require("./helpers/normalizeVector.js");
+const express = require("express");
+const app = express();
+const cors = require("cors");
+const http = require("http");
+const { Server } = require("socket.io");
+const port = 3001;
 
-// Server
-const io = require("socket.io")(3001, {
-  cors: {
-    origin: "*",
-  },
+app.use(cors());
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: "*",
 });
 
-// Board data
-let boardRect;
+server.listen(port, () => {
+  console.log(`Server is running on ${port}`);
+});
 
-// Paddle data
-let leftPaddleRect = {
-  left: 0,
-  right: 0,
-  top: 0,
-  bottom: 0,
-};
+// Refresh rate in ms.
+const REFRESH_RATE = 25;
+const START_VELOCITY = 0.4;
+const VELOCITY_INCREASE = 1.3;
 
-let rightPaddleRect = {
-  left: 0,
-  right: 0,
-  top: 0,
-  bottom: 0,
-};
+const Game = require("./models/Game.js");
 
-let paddleHeight;
-
-// Scores
-let scores = {
-  leftScore: 0,
-  rightScore: 0,
-};
-
-// Ball data
-let ballDirection = normalizeVector(
-  Math.floor(Math.random() * 200) / 100 - 1,
-  Math.floor(Math.random() * 200) / 100 - 1
-);
-
-let ballVelocity = 0.2;
-
-let ballPosition = {
-  top: 50,
-  left: 50,
-};
-
-let ballAxis;
-
-let gameStart = true;
+// Keep track of games and what rooms they belong to
+let games = {};
 
 // Broadcast
 io.on("connection", (socket) => {
-  // Sets players
-  io.to(Array.from(socket.adapter.sids.keys())[0]).emit("set-players", "left");
-  io.to(Array.from(socket.adapter.sids.keys())[1]).emit("set-players", "right");
+  let roomId;
 
-  // Set board rect
-  socket.on("board-rect", (data) => {
-    boardRect = data;
-  });
+  socket.on("create-lobby", (data) => {
+    if (!games[data]) {
+      socket.join(data);
 
-  // Get ball height
-  socket.on("ball-axis", (data) => {
-    ballAxis = data;
-  });
+      roomId = data;
 
-  // Set left and right paddle rects X
-  socket.on("left-paddle-rect", (data) => {
-    const { left, right } = data;
-    leftPaddleRect.left = left;
-    leftPaddleRect.right = right;
-  });
+      games[data] = new Game(data, START_VELOCITY);
 
-  // Set paddle height
-  socket.on("paddle-height", (data) => {
-    paddleHeight = data;
-  });
+      const status = data;
 
-  socket.on("right-paddle-rect", (data) => {
-    const { left, right } = data;
-    rightPaddleRect.left = left;
-    rightPaddleRect.right = right;
-  });
+      socket.emit("create-status", status);
+    } else {
+      const status = false;
 
-  // Moves paddles on input
-  socket.on("move-bar", (data) => {
-    if (boardRect) {
-      // contain left paddle within bounds
-      if (data.left <= boardRect.top) {
-        data.left = boardRect.top;
-      } else if (data.left + paddleHeight >= boardRect.bottom) {
-        data.left = boardRect.bottom - paddleHeight;
-      }
-
-      // contain right paddle within bounds
-      if (data.right <= boardRect.top) {
-        data.right = boardRect.top;
-      } else if (data.right + paddleHeight >= boardRect.bottom) {
-        data.right = boardRect.bottom - paddleHeight;
-      }
-
-      rightPaddleRect.top = data.right;
-      rightPaddleRect.bottom = data.right + paddleHeight;
-      leftPaddleRect.top = data.left;
-      leftPaddleRect.bottom = data.left + paddleHeight;
-
-      {
-        io.emit("relay-move-bar", data);
-      }
+      socket.emit("create-status", status);
     }
   });
 
-  socket.on("restart", (value) => {
-    if (value) {
-      ballDirection = normalizeVector(
-        Math.floor(Math.random() * 200) / 100 - 1,
-        Math.floor(Math.random() * 200) / 100 - 1
+  socket.on("request-rooms", () => {
+    const activeRooms = Object.keys(games).filter((roomId) => {
+      return io.sockets.adapter.rooms.has(roomId);
+    });
+
+    // Update the games object to only include active rooms
+    const updatedGames = {};
+    activeRooms.forEach((roomId) => {
+      updatedGames[roomId] = games[roomId];
+    });
+
+    games = updatedGames;
+
+    socket.emit("rooms", Object.keys(games));
+  });
+
+  socket.on("join-lobby", (data) => {
+    if (games[data] && io.sockets.adapter.rooms.get(data).size === 1) {
+      socket.join(data);
+      roomId = data;
+
+      const status = data;
+
+      socket.emit("join-status", status);
+
+      // Set players
+      io.to(Array.from(io.sockets.adapter.rooms.get(data))[0]).emit(
+        "set-players",
+        "left"
       );
 
-      ballPosition = {
-        top: 50,
-        left: 50,
-      };
+      io.to(Array.from(io.sockets.adapter.rooms.get(data))[1]).emit(
+        "set-players",
+        "right"
+      );
+    } else if (!games[data]) {
+      const status = "not-found";
 
-      gameStart = true;
+      socket.emit("join-status", status);
+    } else if (io.sockets.adapter.rooms.get(data).size > 1) {
+      const status = "full";
+
+      socket.emit("join-status", status);
+
+      console.log("lobby is full", data);
     }
   });
 
-  if (gameStart) {
-    // Moves ball on interval
-    setInterval(() => {
-      if (boardRect && gameStart) {
-        // Handle vertical bounds
-        if (ballPosition.top + ballAxis.height <= boardRect.top) {
-          ballDirection.y = ballDirection.y * -1;
-        } else if (ballPosition.top + ballAxis.height * 2 >= boardRect.bottom) {
-          ballDirection.y = ballDirection.y * -1;
-        }
+  // Get information about local sprite positioning
+  socket.on("game-data", (data) => {
+    const game = games[roomId];
 
-        // Handle horizontal bounds/score
-        if (ballPosition.left <= boardRect.left) {
-          scores.rightScore += 1;
-          // Send scores
-          io.emit("scores", scores);
-          gameStart = false;
-        } else if (ballPosition.left + ballAxis.width * 2 >= boardRect.right) {
-          scores.leftScore += 1;
-          // Send scores
-          io.emit("scores", scores);
-          gameStart = false;
-        }
+    if (game) {
+      game.boardRect = data.boardRect;
+      game.paddleHeight = data.paddleHeight;
+      game.leftPaddleRect.left = data.leftPaddleRect.left;
+      game.leftPaddleRect.right = data.leftPaddleRect.right;
+      game.rightPaddleRect.left = data.rightPaddleRect.left;
+      game.rightPaddleRect.right = data.rightPaddleRect.right;
+      game.ballAxis = data.ballAxis;
+    }
+  });
 
-        //Handle paddle bounds
-        if (
-          ballPosition.left + ballAxis.width * 2 < leftPaddleRect.right &&
-          ballPosition.left + ballAxis.width > leftPaddleRect.left &&
-          ballPosition.top + ballAxis.height < leftPaddleRect.bottom &&
-          ballPosition.top > leftPaddleRect.top
-        ) {
-          ballDirection.x = ballDirection.x * -1;
-        }
-        if (
-          ballPosition.left <= rightPaddleRect.right &&
-          ballPosition.left + ballAxis.width * 2 >= rightPaddleRect.left &&
-          ballPosition.top + ballAxis.height <= rightPaddleRect.bottom &&
-          ballPosition.top >= rightPaddleRect.top
-        ) {
-          ballDirection.x = ballDirection.x * -1;
-        }
+  // Start game on spacebar.
+  socket.on("start-game", () => {
+    if (io.sockets.adapter.rooms.get(roomId).size == 2) {
+      const game = games[roomId];
 
-        // Actual ball movement
-        ballPosition.top = ballPosition.top + ballDirection.y * ballVelocity;
-        ballPosition.left = ballPosition.left + ballDirection.x * ballVelocity;
+      if (game) {
+        game.readyPlayers += 1;
       }
 
+      // Moves paddles on input, timeout to prevent sending data too frequently causing lag
+      socket.on("move-bar", (data) => {
+        game.movePaddles(data);
+        io.in(roomId).emit("relay-move-bar", game.paddleYPositions);
+      });
+
+      // Allows client to restart on 'r'.
+      socket.on("restart", (value) => {
+        clearInterval(game.gameLoop);
+        game.reset();
+      });
+
+      // Start the game loop only if it's not already running
+      if (!game.gameLoop && game.readyPlayers === 2) {
+        game.gameStart = true;
+
+        game.gameLoop = setInterval(() => {
+          updateGame(game);
+        }, REFRESH_RATE);
+      }
+    }
+  });
+
+  function updateGame(game) {
+    if (game.boardRect && game.gameStart) {
+      // Handle vertical bounds
+      if (game.verticalCollision()) {
+        game.ballDirection.y = game.ballDirection.y * -1;
+      }
+      // Handle horizontal bounds/score
+      if (game.horizontalCollision()) {
+        // Send scores
+        io.in(game.roomId).emit("scores", game.scores);
+        clearInterval(game.gameLoop);
+        game.reset();
+      }
+      //Handle paddle bounds
+      if (game.handlePaddleCollision()) {
+        game.ballDirection.x = game.ballDirection.x * -1;
+        game.increaseSpeed(VELOCITY_INCREASE);
+      }
+      game.moveBall();
       // Sending data to client
-      io.emit("ball-position", ballPosition);
-    }, 15);
+      io.in(game.roomId).emit("ball-position", game.ballPosition);
+    }
   }
 });

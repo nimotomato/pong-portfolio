@@ -21,7 +21,6 @@ function Singleplayer() {
       if (window.innerWidth > 1025) {
         startInfo.textContent = "PRESS ANY KEY TO START THE GAME";
       } else {
-        startInfo.textContent = "TOUCH TO START";
       }
       document.body.appendChild(startInfo);
     }
