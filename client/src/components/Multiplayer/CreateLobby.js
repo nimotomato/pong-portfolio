@@ -14,6 +14,11 @@ const CreateLobby = () => {
     socket.emit("create-lobby", idRef.current.value);
   };
 
+  const info = document.querySelector(".info-text");
+  if (info) {
+    document.body.removeChild(info);
+  }
+
   useEffect(() => {
     const handleCreate = (data) => {
       if (data) {

@@ -1,7 +1,7 @@
 /* .paddle{
     position: absolute;
     height: 14vh;
-    width: 2.2vh;
+    width: 2.2em;
     background-color: coral;
     top: 45vh;
 }
@@ -13,5 +13,4 @@
 .right.paddle{
     right: 2vw;
 }
-
  */

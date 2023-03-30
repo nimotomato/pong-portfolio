@@ -38,7 +38,6 @@ io.on("connection", (socket) => {
       roomId = data;
 
       games[data] = new Game(data, START_VELOCITY);
-      console.log(games[data]);
 
       const status = data;
 
@@ -62,7 +61,6 @@ io.on("connection", (socket) => {
     });
 
     games = updatedGames;
-    console.log(updatedGames);
 
     socket.emit("rooms", Object.keys(games));
   });
@@ -118,7 +116,10 @@ io.on("connection", (socket) => {
   socket.on("start-game", () => {
     if (io.sockets.adapter.rooms.get(roomId).size == 2) {
       const game = games[roomId];
-      console.log(game.ballDirection);
+
+      if (game) {
+        game.readyPlayers += 1;
+      }
 
       // Moves paddles on input, timeout to prevent sending data too frequently causing lag
       socket.on("move-bar", (data) => {
@@ -133,15 +134,13 @@ io.on("connection", (socket) => {
       });
 
       // Start the game loop only if it's not already running
-      if (!game.gameLoop) {
+      if (!game.gameLoop && game.readyPlayers === 2) {
         game.gameStart = true;
 
         game.gameLoop = setInterval(() => {
           updateGame(game);
         }, REFRESH_RATE);
       }
-    } else if (io.sockets.adapter.rooms.get(roomId).size == 1) {
-      io.in(roomId).emit("waiting-for-player");
     }
   });
 
@@ -161,7 +160,7 @@ io.on("connection", (socket) => {
       //Handle paddle bounds
       if (game.handlePaddleCollision()) {
         game.ballDirection.x = game.ballDirection.x * -1;
-        game.ballVelocity = game.ballVelocity * VELOCITY_INCREASE;
+        game.increaseSpeed(VELOCITY_INCREASE);
       }
       game.moveBall();
       // Sending data to client

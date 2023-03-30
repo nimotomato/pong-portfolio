@@ -39,6 +39,8 @@ class Game {
 
     this.ballVelocity = START_VELOCITY;
 
+    this.maxVelocity = 1;
+
     this.ballPosition = {
       top: 50,
       left: 50,
@@ -49,6 +51,8 @@ class Game {
     this.gameStart = false;
 
     this.gameLoop = null;
+
+    this.readyPlayers = 0;
   }
 
   moveBall() {
@@ -144,6 +148,12 @@ class Game {
     }
   }
 
+  increaseSpeed(VELOCITY_INCREASE) {
+    if (this.ballVelocity * VELOCITY_INCREASE < this.maxVelocity) {
+      this.ballVelocity = this.ballVelocity * VELOCITY_INCREASE;
+    }
+  }
+
   // Resets the game
   reset() {
     this.ballDirection = normalizeVector(
@@ -157,6 +167,8 @@ class Game {
     };
 
     this.gameStart = false;
+
+    this.readyPlayers = 0;
 
     this.gameLoop = null;
   }

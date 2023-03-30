@@ -21,6 +21,8 @@ function Driver() {
 
   // Give socket connection a player side. Data from server says either right or left.
   const [player, setPlayer] = useState(null);
+  const [timeoutId, setTimeoutId] = useState(null);
+  const [ready, setReady] = useState(false);
 
   // Set up connection
   useLayoutEffect(() => {
@@ -72,6 +74,7 @@ function Driver() {
   const [scores, setScores] = useState({});
 
   socket.on("scores", (data) => {
+    setReady(false);
     setScores(data);
   });
 
@@ -123,24 +126,29 @@ function Driver() {
   };
 
   const addPaddleListeners = () => {
-    document.addEventListener("mousedown", handleMouseDown);
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    const id = setTimeout(() => {
+      document.addEventListener("mousedown", handleMouseDown);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
 
-    // Touch screen
-    document.addEventListener("touchstart", handleMouseDown);
-    document.addEventListener("touchmove", handleTouchMove);
-    document.addEventListener("touchend", handleMouseUp);
+      // Touch screen
+      document.addEventListener("touchstart", handleMouseDown);
+      document.addEventListener("touchmove", handleTouchMove);
+      document.addEventListener("touchend", handleMouseUp);
+    }, 500);
+    setTimeoutId(id);
   };
 
   const removePaddleListeners = () => {
+    clearTimeout(timeoutId);
+
     document.removeEventListener("mousedown", handleMouseDown);
     document.removeEventListener("mousemove", handleMouseMove);
     document.removeEventListener("mouseup", handleMouseUp);
 
     // Touch screen
     document.removeEventListener("touchstart", handleMouseDown);
-    document.removeEventListener("touchmove", handleMouseMove);
+    document.removeEventListener("touchmove", handleTouchMove);
     document.removeEventListener("touchend", handleMouseUp);
   };
 
@@ -176,12 +184,12 @@ function Driver() {
 
   useEffect(() => {
     const handleKeyPress = (event) => {
-      if (event.code === "Space") {
+      if (!ready && event.code === "Space") {
+        setReady(true);
         socket.emit("start-game");
       } else if (event.code === "KeyR") {
+        setReady(false);
         socket.emit("restart", true);
-      } else if (event.code === "KeyC") {
-        socket.emit("check");
       }
     };
 
@@ -198,7 +206,7 @@ function Driver() {
         leftScore={scores.leftScore || 0}
         rightScore={scores.rightScore || 0}
       />
-      <Board ballPosition={ballPosition} />
+      <Board ballPosition={ballPosition} ready={ready} />
       <Paddle direction={"left"} position={positions.left} />
       <Paddle direction={"right"} position={positions.right} />
     </div>
